@@ -1,0 +1,19 @@
+{
+  "name": "tp-nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vega1030/tp-nodejs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vega1030/tp-nodejs/issues"
+  },
+  "homepage": "https://github.com/vega1030/tp-nodejs#readme"
+}
