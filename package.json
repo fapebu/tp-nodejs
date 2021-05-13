@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/vega1030/tp-nodejs/issues"
   },
-  "homepage": "https://github.com/vega1030/tp-nodejs#readme"
+  "homepage": "https://github.com/vega1030/tp-nodejs#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
