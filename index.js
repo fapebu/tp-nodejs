@@ -69,13 +69,30 @@ app.post('/persona', async (req, res) => {
     }
 })
 
-app.get('/persona', (req, res) => {
+app.get('/persona', async (req, res) => {
     try {
+        const query = 'SELECT * FROM persona'
+        const respuesta = await qy(query, [req.params])
+        res.send({ "respuesta": respuesta })
 
     }
-    catch {
-
+    catch (e) {
+        console.error(e.message);
+        res.status(403).send({ "Error": e.message })
     }
+})
+
+app.get('/persona/:id', async (req, res) => {
+    try {
+        const query = 'SELECT * FROM persona WHERE id = ?';
+        const respuesta = await qy(query, [req.params.id]);
+        res.send({ 'respuesta': respuesta })
+    }
+    catch (e) {
+        console.error(e.message);
+        res.status(403).send({ "Error": e.message })
+    }
+
 
 })
 
