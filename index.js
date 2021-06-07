@@ -43,20 +43,21 @@ const qy = util.promisify(conexion.query).bind(conexion);
 
 app.post('/persona', async (req, res) => {
     try {
-        const nombre = req.body.nombre
-        const alias = req.body.alias
-        const apellido = req.body.apellido
-        const email = req.body.email
 
         //validacion correcta de la info
         if (!req.body.nombre || !req.body.alias || !req.body.apellido || !req.body.email) {
             throw new Error('Falta completar con datos');
         }
         let query = 'SELECT * FROM persona WHERE email=?'
-        let respuesta = await qy(query, [email]);
+        let respuesta = await qy(query, [req.body.email]);
         if (respuesta.length > 0) {
             throw new Error('Este email esta ingresado');
         }
+        const nombre = req.body.nombre
+        const alias = req.body.alias
+        const apellido = req.body.apellido
+        const email = req.body.email
+
         query = 'INSERT INTO persona (nombre,alias,apellido,email) VALUES(?,?,?,?)'
 
         respuesta = await qy(query, [nombre, alias, apellido, email]);
