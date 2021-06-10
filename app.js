@@ -191,13 +191,11 @@ app.put('/persona/:id', async (req, res) => {
             throw new Error("El email no se puede modificar")
         }
 
-        // respuesta = await qy(query, [req.body.email])
-        // if (respuesta.length > 0) {
-        //     throw new Error('El email no se puede modificar')
-        // }
         //Modificacion del id seleccionado
         query = 'UPDATE persona SET nombre = ?, apellido = ?, alias = ? WHERE id=?';
         respuesta = await qy(query, [req.body.nombre, req.body.apellido, req.body.alias, req.params.id])
+
+        //Negacion para modificar el email
         const email = req.body.email
         if (email.length > 0) {
             throw new Error("El email no se puede modificar")
