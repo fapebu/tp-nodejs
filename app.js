@@ -106,7 +106,7 @@ app.get('/persona', async (req, res) => {
             throw new Error("No hay informacion")
         }
         res.send({ "respuesta": respuesta })
-
+        console.log([" "])
     }
     catch (e) {
         console.error(e.message);
@@ -155,6 +155,14 @@ app.delete('/persona/:id', async (req, res) => {
             throw new Error("Esta persona no existe")
         }
 
+        //Denegacion de persona con libro asociado
+        query = 'SELECT * FROM libro WHERE 	persona_id=id'
+        respuesta = await qy(query, [req.params.id]);
+        if (respuesta.length === 0) {
+            throw new Error("esa persona tiene libros asociados, no se puede eliminar")
+        }
+
+        //delete de persona
         query = 'DELETE FROM persona WHERE id = ?'
 
         respuesta = await qy(query, [req.params.id]);
@@ -184,29 +192,21 @@ app.put('/persona/:id', async (req, res) => {
             throw new Error("El id seleccionado no existe")
         }
 
-        //Denegacion de cambios en el email
-        query = 'SELECT * FROM persona WHERE email = ? AND id =?';
-        respuesta = await qy(query, [req.body.email, req.params.id])
-        if (respuesta.length > 0) {
+        query = 'SELECT * FROM persona WHERE email=?'
+        respuesta = await qy(query, [req.body.email])
+        if (respuesta.length === 0) {
             throw new Error("El email no se puede modificar")
         }
 
-        //Modificacion del id seleccionado
         query = 'UPDATE persona SET nombre = ?, apellido = ?, alias = ? WHERE id=?';
         respuesta = await qy(query, [req.body.nombre, req.body.apellido, req.body.alias, req.params.id])
-
-        //Negacion para modificar el email
-        const email = req.body.email
-        if (email.length > 0) {
-            throw new Error("El email no se puede modificar")
-        }
         res.send({ "respuesta": respuesta.affectedRows })
     }
-
     catch (e) {
         console.error(e.message);
         res.status(413).send({ "Error": e.message })
     }
+
 })
 
 
