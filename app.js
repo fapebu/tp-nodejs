@@ -10,6 +10,17 @@
 // GET '/persona/:id' retorna status 200 y {id: numerico, nombre: string, apellido: string, alias: string, email; string} 
 //status 413 , {mensaje: <descripcion del error>} "error inesperado", "no se encuentra esa persona"
 
+/*
+
+*/
+
+
+/*
+PUT '/persona/:id' recibe: {nombre: string, apellido: string, alias: string, email: string} 
+el email no se puede modificar. 
+retorna status 200 y el objeto modificado 
+o bien status 413, {mensaje: <descripcion del error>} "error inesperado", "no se encuentra esa persona"
+*/
 
 'use strict'
 
@@ -47,9 +58,9 @@ conexion.connect((error) => {
 const qy = util.promisify(conexion.query).bind(conexion);
 
 /*
---------------------
-|INGRESO DE PERSONA|
---------------------
+    --------------------
+    |INGRESO DE PERSONA|
+    --------------------
 */
 
 app.post('/persona', async (req, res) => {
@@ -82,9 +93,9 @@ app.post('/persona', async (req, res) => {
 })
 
 /*
----------------
-|RUTA /PERSONA|
----------------
+    ---------------
+    |RUTA /PERSONA|
+    ---------------
 */
 
 app.get('/persona', async (req, res) => {
@@ -105,9 +116,9 @@ app.get('/persona', async (req, res) => {
 
 
 /*
-------------------
-|RUTA /PERSONA/ID|
-------------------
+    ------------------
+    |RUTA /PERSONA/ID|
+    ------------------
 */
 
 app.get('/persona/:id', async (req, res) => {
@@ -124,10 +135,77 @@ app.get('/persona/:id', async (req, res) => {
         console.error(e.message);
         res.status(403).send({ "Error": e.message })
     }
-
-
 })
+
+/*
+    --------------------
+    |BORRAR /PERSONA/ID|
+    --------------------
+*/
+
+
+app.delete('/persona/:id', async (req, res) => {
+    try {
+
+        let query = 'SELECT * FROM persona WHERE id = ?';
+
+        let respuesta = await qy(query, [req.params.id]);
+
+        if (respuesta.length === 0) {
+            throw new Error("Esta persona no existe")
+        }
+
+        query = 'DELETE FROM persona WHERE id = ?'
+
+        respuesta = await qy(query, [req.params.id]);
+
+        res.send({ "se borro correctamente el id": req.params.id });
+    }
+    catch (e) {
+        console.error(e.message);
+        res.status(403).send({ "Error": e.message })
+    }
+
+});
+
+/*
+    -----------------------
+    |MODIFICAR /PERSONA/ID|
+    -----------------------
+*/
+
+app.put('/persona/:id', async (req, res) => {
+
+    try {
+        //Error de id
+        let query = 'SELECT * FROM persona WHERE id = ?'
+        let respuesta = await qy(query, [req.params.id])
+        if (respuesta.length === 0) {
+            throw new Error("El id seleccionado no existe")
+        }
+
+        //Restriccion a la modificacion del email
+        respuesta = await qy(query, [req.body.email])
+        if (respuesta.length > 0) {
+            throw new Error('El email no se puede modificar')
+        }
+
+        //Modificacion del id seleccionado
+        respuesta = await qy(query, [req.body.nombre, req.body.apellido, req.body.alias])
+        query = 'UPDATE persona SET nombre = ?, apellido = ?, alias = ? WHERE id=?';
+        respuesta = await qy(query, [req.body.nombre, req.body.apellido, req.body.alias, req.params.id])
+
+        res.send({ "respuesta": respuesta.affectedRows })
+    }
+
+    catch (e) {
+        console.error(e.message);
+        res.status(413).send({ "Error": e.message })
+    }
+})
+
+
 //listen port
 app.listen(port, () => {
-    console.log('cuchando el puerto ' + port)
+    console.log('escuchando el puerto ' + port)
 })
