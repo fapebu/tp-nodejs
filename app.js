@@ -46,17 +46,20 @@ try {
     query = 'SELECT * FROM persona WHERE id=?';
     respuesta = await qy(query, [req.body.persona_id]);
     
-    if (respuesta.length = 0 && req.body.persona_id != null) {
+    if (respuesta.length == 0 && req.body.persona_id != "null") {
         throw new Error('no existe la persona indicada');
+    }
+    if(req.body.persona_id == "null"){
+        query = 'INSERT INTO `libro` (`nombre`,`descripcion`,`categoria_id`,`persona_id`) VALUES(?,?,?,NULL)';
+    }else{
+        query = 'INSERT INTO `libro` (`nombre`,`descripcion`,`categoria_id`,`persona_id`) VALUES(?,?,?,?)';
     }
     
     let descripcion = "descripcion no disponible";
     if(req.body.descripcion.trim()) {
       descripcion = req.body.descripcion;
     }
-    
-    query = 'INSERT INTO `libro` (`nombre`,`descripcion`,`categoria_id`,`persona_id`) VALUES(?,?,?,?)';
-    respuesta = await qy(query, [req.body.nombre.toUpperCase(),descripcion, req.body.categoria_id, req.body.persona_id]);
+    respuesta = await qy(query, [req.body.nombre.toUpperCase(),descripcion, req.body.categoria_id,req.body.persona_id]);
 
     query = "SELECT * FROM `libro` WHERE `nombre` = ? AND `categoria_id`= ?";
     respuesta = await qy(query, [req.body.nombre.toUpperCase(),req.body.categoria_id]);
