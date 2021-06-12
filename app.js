@@ -49,43 +49,45 @@ conexion.connect((error)=>{
 
 const qy= util.promisify(conexion.query).bind(conexion); 
 
-app.post('libro', async (req, res) =>{
+app.post('/libro', async (req, res) =>{
 try { 
-    //verifico la informacion
-    if(!req.body.nombre || !req.body.categoria_id){
-        throw new Error('nombre y categoria sondatos obligatorios');
+    if(!req.body.nombre.trim() || !req.body.categoria_id.trim()){
+        throw new Error('nombre y categoria son datos obligatorios');
     }
 
-    //verifico que el libro no exista previamente
- 
     let query = 'SELECT * FROM libro WHERE nombre = ?';
-    let respuesta = await qy(query, [req.body.nombe.toUpperCase()]);
+    let respuesta = await qy(query, [req.body.nombre.toUpperCase()]);
     
-    if (respuesta.length > 0) {
+    if (respuesta.length != 0) {
         throw new Error('Ese nombre de libro ya existe');
     }
 
-    query = 'SELECT * FROM categorias WHERE id= ?';
-    respuesta = await qy(query, [req.params.categoria_id]);
-
+    query = 'SELECT * FROM categoria WHERE id=?';
+    respuesta = await qy(query, [req.body.categoria_id]);
+    
     if(respuesta.length == 0) {
         throw new Error('no existe la categoria indicada')
     }
 
-    query = 'SELECT * FROM personas WHERE id=?';
-    respuesta = await qy(query, [req.params.id]);
+    query = 'SELECT * FROM persona WHERE id=?';
+    respuesta = await qy(query, [req.body.persona_id]);
     
-    if (respuesta.length > 0) {
+    if (respuesta.length = 0 && req.body.persona_id != null) {
         throw new Error('no existe la persona indicada');
     }
     
-    let descripcion = '';
-    if(req.body.descripcion) {
-        descripcion = req.body.descripcion;
+    let descripcion = "descripcion no disponible";
+    if(req.body.descripcion.trim()) {
+      descripcion = req.body.descripcion;
     }
     
-    query = 'INSERT INTO libro (nombre, descripcion, categoria_id, persona_id VALUES(?,?,?,?)';
-    respuesta = await qy(query, [req.body.nombre.toUpperCase(), descripcion, req.body.categoria_id, req.body.persona_id]);
+    query = 'INSERT INTO `libro` (`nombre`,`descripcion`,`categoria_id`,`persona_id`) VALUES(?,?,?,?)';
+    respuesta = await qy(query, [req.body.nombre.toUpperCase(),descripcion, req.body.categoria_id, req.body.persona_id]);
+
+    query = "SELECT * FROM `libro` WHERE `nombre` = ? AND `categoria_id`= ?";
+    respuesta = await qy(query, [req.body.nombre.toUpperCase(),req.body.categoria_id]);
+
+    res.status(200).send({respuesta});
     }
     catch(e){
         console.error(e.message);
@@ -95,18 +97,18 @@ try {
 });
 
 
-app.get('/libro/', async (req, res) =>{
+app.get('/libro', async (req, res) =>{
     try {
-        const query = 'SELECT * FROM producto';
+        const query = 'SELECT * FROM libro';
         
         const respuesta = await qy(query);
 
-        res.send({'respuesta': respuesta});
+        res.status(200).send({respuesta});
     }
 
     catch(e){
         console.error(e.message);
-        res.status.apply(413).send({'error inesperado': e.message});
+        res.status(413).send({'error inesperado': e.message});
     }
 
 });
@@ -114,14 +116,16 @@ app.get('/libro/', async (req, res) =>{
 
 app.get('/libro/:id', async (req, res) =>{
     try {
-
-        //'SELECT * FROM caterogia  WHERE id = ?' o 'SELECT * FROM libro  WHERE id = ?' ??
         let query = 'SELECT * FROM libro  WHERE id = ?' ;
         let respuesta = await qy(query, [req.params.id]);
-        res.send({'respuesta': respuesta});
+        if(respuesta.length == 0){
+            throw new Error("No se encuentra ese libro");
+        }
+        res.status(200).send({respuesta});
+    
     }catch(e){
         console.error(e.message);
-        res.status(413).send({"No se encuentra ese libro": e.message});
+        res.status(413).send({"mensaje":e.message});
     
     }
 
