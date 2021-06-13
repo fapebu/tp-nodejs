@@ -74,7 +74,7 @@ app.get('/persona', async (req, res) => {
             throw new Error("No hay informacion")
         }
         res.send({ "respuesta": respuesta })
-        console.log([" "])
+       
     }
     catch (e) {
         console.error(e.message);
@@ -124,9 +124,9 @@ app.delete('/persona/:id', async (req, res) => {
         }
 
         //Denegacion de persona con libro asociado
-        query = 'SELECT * FROM libro WHERE 	persona_id=id'
+        query = 'SELECT * FROM libro WHERE 	persona_id=?'
         respuesta = await qy(query, [req.params.id]);
-        if (respuesta.length === 0) {
+        if (respuesta.length != 0) {
             throw new Error("esa persona tiene libros asociados, no se puede eliminar")
         }
 
