@@ -1,3 +1,5 @@
+'use strict'
+
 // PERSONA
 
 // POST '/persona' receive: {nombre: string, apellido: string, alias: string, email: string} 
@@ -22,7 +24,6 @@ retorna status 200 y el objeto modificado
 o bien status 413, {mensaje: <descripcion del error>} "error inesperado", "no se encuentra esa persona"
 */
 
-'use strict'
 
 /*
 ----------------------
@@ -66,7 +67,7 @@ const qy = util.promisify(conexion.query).bind(conexion);
 app.post('/persona', async (req, res) => {
     try {
         //validacion correcta de la info
-        if (!req.body.nombre || !req.body.alias || !req.body.apellido || !req.body.email) {
+        if (!req.body.nombre.toUpperCase() || !req.body.alias || !req.body.apellido.toUpperCase() || !req.body.email) {
             throw new Error("Faltan completar datos");
         }
         let query = 'SELECT * FROM persona WHERE email=?'
@@ -74,9 +75,9 @@ app.post('/persona', async (req, res) => {
         if (respuesta.length > 0) {
             throw new Error("El email ya se encuentra ingresado");
         }
-        const nombre = req.body.nombre
+        const nombre = req.body.nombre.toUpperCase()
         const alias = req.body.alias
-        const apellido = req.body.apellido
+        const apellido = req.body.apellido.toUpperCase()
         const email = req.body.email
 
         query = 'INSERT INTO persona (nombre,alias,apellido,email) VALUES(?,?,?,?)'
@@ -125,7 +126,6 @@ app.get('/persona/:id', async (req, res) => {
     try {
         const query = 'SELECT * FROM persona WHERE id = ?';
         const respuesta = await qy(query, [req.params.id]);
-        console.log(respuesta)
         if (respuesta.length === 0) {
             throw new Error("el id no existe")
         }
@@ -158,20 +158,21 @@ app.delete('/persona/:id', async (req, res) => {
         //Denegacion de persona con libro asociado
         query = 'SELECT * FROM libro WHERE 	persona_id=id'
         respuesta = await qy(query, [req.params.id]);
-        if (respuesta.length === 0) {
-            throw new Error("esa persona tiene libros asociados, no se puede eliminar")
+        if (respuesta.length > 0) {
+            throw new Error("Esta persona tiene libros asociados, no se puede eliminar")
         }
 
         //delete de persona
         query = 'DELETE FROM persona WHERE id = ?'
 
         respuesta = await qy(query, [req.params.id]);
-
-        res.send({ "se borro correctamente el id": req.params.id });
+        if (respuesta) {
+            res.status(200).send({ "se borro correctamente el id": req.params.id });
+        }
     }
     catch (e) {
         console.error(e.message);
-        res.status(403).send({ "Error": e.message })
+        res.status(403).send({ "Error": "Esta persona tiene libros asociados, no se puede eliminar" })
     }
 
 });
@@ -199,7 +200,7 @@ app.put('/persona/:id', async (req, res) => {
         }
 
         query = 'UPDATE persona SET nombre = ?, apellido = ?, alias = ? WHERE id=?';
-        respuesta = await qy(query, [req.body.nombre, req.body.apellido, req.body.alias, req.params.id])
+        respuesta = await qy(query, [req.body.nombre.toUpperCase(), req.body.apellido.toUpperCase(), req.body.alias, req.params.id])
         res.send({ "respuesta": respuesta.affectedRows })
     }
     catch (e) {
@@ -208,6 +209,9 @@ app.put('/persona/:id', async (req, res) => {
     }
 
 })
+
+
+
 
 
 //listen port
