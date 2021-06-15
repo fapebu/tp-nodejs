@@ -1,12 +1,19 @@
+
 # Trabajo Practico NODE.JS
 
 
 ![](https://upload.wikimedia.org/wikipedia/commons/d/d9/Node.js_logo.svg)
 
-[TOC]
+Trabajo realizado para la diplomatura "programación web full stack con React JS"
 
+# Table of contents
 
-###Consigna: Where'is my books?
+* [Consigna](#Consigna)
+* [Instrucciones](#Instrucciones)
+* [Integrantes](#Integrantes)
+
+Trabajo realizado para la diplomatura "programación web full stack con React JS"
+### Consigna
 
 
 Se trata de un proyecto de desarrollo backend en NodeJS, utilizando API Rest y base de datos MySQL para conocer si los libros del usuario se encuentran en su biblioteca o prestados. En caso de estar prestado, a quien se los presto.
@@ -95,12 +102,12 @@ DELETE '/libro/:id' devuelve 200 y {mensaje: "se borro correctamente"}  o bien s
 
 
 
-###Instrucciones
+### Instrucciones
 Para ejecutar el programa primero se debe instalar las dependencias con el comando:
 
 `$ npm install`
 
-###Integrantes
+### Integrantes
                     
 |Apellido | Nombre    |
 |------------- | -------------|
@@ -110,3 +117,4 @@ Para ejecutar el programa primero se debe instalar las dependencias con el coman
 |Perez Buttori | Fabricio   |
 |Viggiani | Ignacio|
 |Vega | Fernando  |
+
