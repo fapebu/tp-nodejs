@@ -10,7 +10,7 @@ const conexion = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'tp_mybook'
+    database: 'tp_node'
 });
 
 conexion.connect((error) => {
@@ -34,26 +34,29 @@ const qy = util.promisify(conexion.query).bind(conexion);
 app.post('/persona', async (req, res) => {
     try {
         //validacion correcta de la info
-        if (!req.body.nombre || !req.body.alias || !req.body.apellido || !req.body.email) {
+        if (!req.body.nombre.trim() || !req.body.alias.trim() || !req.body.apellido.trim() || !req.body.email.trim()) {
             throw new Error("Faltan completar datos");
         }
         let query = 'SELECT * FROM persona WHERE email=?'
-        let respuesta = await qy(query, [req.body.email]);
-        if (respuesta.length > 0) {
+        let respuesta = await qy(query, [req.body.email.toUpperCase()]);
+        if (respuesta.length != 0) {
             throw new Error("El email ya se encuentra ingresado");
         }
-        const nombre = req.body.nombre
-        const alias = req.body.alias
-        const apellido = req.body.apellido
-        const email = req.body.email.toLowerCase()
+        const nombre = req.body.nombre.toUpperCase();
+        const alias = req.body.alias.toUpperCase();
+        const apellido = req.body.apellido.toUpperCase();
+        const email = req.body.email.toUpperCase();
 
         query = 'INSERT INTO persona (nombre,alias,apellido,email) VALUES(?,?,?,?)'
         respuesta = await qy(query, [nombre, alias, apellido, email]);
 
-        res.send({ 'respuesta': respuesta })
+        query = 'SELECT * FROM persona WHERE email=?'
+        respuesta = await qy(query, [req.body.email.toUpperCase()]);
+        
+        res.send({ respuesta })
     }
     catch (e) {
-        if (Error() === undefined) {
+        if (Error() == undefined) {
             res.status(500).send({ "Error": "Error inesperado" })
         }
         res.status(413).send({ "Error": e.message })
@@ -70,7 +73,7 @@ app.get('/persona', async (req, res) => {
     try {
         const query = 'SELECT * FROM persona'
         const respuesta = await qy(query, [req.params])
-        if (respuesta.length === 0) {
+        if (respuesta.length == 0) {
             throw new Error("No hay informacion")
         }
         res.send({ "respuesta": respuesta })
@@ -93,15 +96,14 @@ app.get('/persona/:id', async (req, res) => {
     try {
         const query = 'SELECT * FROM persona WHERE id = ?';
         const respuesta = await qy(query, [req.params.id]);
-        console.log(respuesta)
-        if (respuesta.length === 0) {
-            throw new Error("no se encuentra esa persona")
+        if (respuesta.length == 0) {
+            throw new Error("no se encuentra esa persona");
         }
-        res.send({ 'respuesta': respuesta })
+        res.send({respuesta });
     }
     catch (e) {
         console.error(e.message);
-        res.status(403).send({ "Error": e.message })
+        res.status(403).send({ "Error": e.message });
     }
 })
 
@@ -119,8 +121,8 @@ app.delete('/persona/:id', async (req, res) => {
 
         let respuesta = await qy(query, [req.params.id]);
 
-        if (respuesta.length === 0) {
-            throw new Error("Esta persona no existe")
+        if (respuesta.length == 0) {
+            throw new Error("Esta persona no existe");
         }
 
         //Denegacion de persona con libro asociado
@@ -135,7 +137,7 @@ app.delete('/persona/:id', async (req, res) => {
 
         respuesta = await qy(query, [req.params.id]);
 
-        res.send({ "se borro correctamente el id": req.params.id });
+        res.send({"se borro correctamente el id": req.params.id });
     }
     catch (e) {
         console.error(e.message);
@@ -150,23 +152,25 @@ app.delete('/persona/:id', async (req, res) => {
 */
 
 app.put('/persona/:id', async (req, res) => {
-
+    if (!req.body.nombre.trim() || !req.body.alias.trim() || !req.body.apellido.trim() || !req.body.email.trim()) {
+        throw new Error("Faltan completar datos");
+    }
     try {
 
         let query = 'SELECT * FROM persona WHERE id = ?'
         let respuesta = await qy(query, [req.params.id])
-        if (respuesta.length === 0) {
+        if (respuesta.length == 0) {
             throw new Error("No se encuentra esa persona")
         }
 
         query = 'SELECT * FROM persona WHERE email=?'
-        respuesta = await qy(query, [req.body.email])
-        if (respuesta.length === 0) {
+        respuesta = await qy(query, [req.body.email.toUpperCase()])
+        if (respuesta.length == 0) {
             throw new Error("El email no se puede modificar")
         }
 
         query = 'UPDATE persona SET nombre = ?, apellido = ?, alias = ? WHERE id=?';
-        respuesta = await qy(query, [req.body.nombre, req.body.apellido, req.body.alias, req.params.id])
+        respuesta = await qy(query, [req.body.nombre.toUpperCase(), req.body.apellido.toUpperCase(), req.body.alias.toUpperCase(), req.params.id])
         res.send({ "respuesta": respuesta.affectedRows })
     }
     catch (e) {
@@ -184,7 +188,7 @@ app.put('/persona/:id', async (req, res) => {
 app.post('/categoria', async (req, res) => {
     try {
         //validacion de datos
-        if (!req.body.nombre.toUpperCase().trim()) {
+        if (!req.body.nombre.trim()) {
             throw new Error('Faltan datos');
         }
 
